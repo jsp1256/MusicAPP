@@ -1,7 +1,11 @@
 package tk.xiangjianpeng.musicapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -18,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     SimpleAdapter adapter;
     ListView MusicList;
+    List<Mp3Info> mp3Infos;
 
     Button button;
 
@@ -26,7 +31,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         MusicList = (ListView) findViewById(R.id.music_list);
+        MusicList.setOnItemClickListener(new MusicListItemClickListener());
+    }
+    private class MusicListItemClickListener implements AdapterView.OnItemClickListener{
 
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+            if(mp3Infos != null){
+                Mp3Info mp3Info=mp3Infos.get(position);
+                Log.d("mp3Info-->",mp3Info.toString());
+                Intent intent=new Intent();
+                intent.putExtra("url",mp3Info.getUrl());
+                intent.putExtra("MSG",AppConstant.PlayerMsg.PLAY_MSG);
+                intent.setClass(MainActivity.this,PlayerService.class);
+                startService(intent);
+            }
+        }
     }
 
     /**
