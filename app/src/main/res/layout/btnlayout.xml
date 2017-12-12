@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/previous_music"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/previous_music_selector"/>
+
+        <Button
+            android:id="@+id/repeat_music"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/previous_music"
+            android:background="@drawable/repeat_none_selector" />
+        <Button
+            android:id="@+id/play_music"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/repeat_music"
+            android:background="@drawable/play_selector" />
+
+        <Button
+            android:id="@+id/shuffle_music"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/play_music"
+            android:background="@drawable/random_selector" />
+
+        <Button
+            android:id="@+id/next_music"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/next_music_selector" />
+</LinearLayout>
