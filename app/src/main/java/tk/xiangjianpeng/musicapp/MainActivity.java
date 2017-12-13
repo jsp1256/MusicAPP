@@ -1,13 +1,15 @@
 package tk.xiangjianpeng.musicapp;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
@@ -29,8 +31,8 @@ public class MainActivity extends CheckPermissionsActivity {
     private List<Mp3Info> mp3Infos = null;
     private TextView musicArtist;        //艺术家
     private TextView musicTitle;        //歌曲标题
-    private TextView musicDuration;     //歌曲时间
-    private Button musicPlaying;        //歌曲专辑
+
+    private PlayerService.PlayBinder playBinder;
 
     private RelativeLayout singleSong_layout; //歌曲显示栏
 
@@ -52,6 +54,25 @@ public class MainActivity extends CheckPermissionsActivity {
         musicArtist =(TextView) findViewById(R.id.music_Artist_tv);
         musicTitle = (TextView) findViewById(R.id.music_Title_tv);
         singleSong_layout = (RelativeLayout) findViewById(R.id.singleSong_layout);
+        singleSong_layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent(MainActivity.this,UiActivity.class);
+                startActivity(intent);
+            }
+        });
+
+    }
+    //bind服务绑定
+    public void ServiceBind(View view){
+
+    }
+
+    private class PlayServiceConnection implements ServiceConnection{
+        public void onServiceConnected(ComponentName name, IBinder PlayBind){
+            playBinder= (PlayerService.PlayBinder) PlayBind;
+        }
+        public void onServiceDisconnected(ComponentName name){}
     }
 
     private class MusicListItemClickListener implements AdapterView.OnItemClickListener {
@@ -64,7 +85,7 @@ public class MainActivity extends CheckPermissionsActivity {
                 musicArtist.setText(mp3Info.getArtist());
                 musicTitle.setText(mp3Info.getTitle());
                 Intent intent = new Intent();
-                intent.putExtra("url", mp3Info.getUrl());
+                intent.putExtra("position", position);
                 intent.putExtra("MSG", AppConstant.PlayerMsg.PLAY_MSG);
                 intent.setClass(MainActivity.this, PlayerService.class);
                 startService(intent);
