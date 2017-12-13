@@ -1,5 +1,6 @@
 package tk.xiangjianpeng.musicapp;
 
+import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 
@@ -23,4 +24,8 @@ public class UiActivity extends AppCompatActivity {
 
     private int currentTime;    //当前时间
     private int duration;       //持续时间
+    public void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.ui_layout);
+    }
 }
