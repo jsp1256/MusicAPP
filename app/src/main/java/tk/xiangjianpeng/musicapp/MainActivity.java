@@ -1,13 +1,10 @@
 package tk.xiangjianpeng.musicapp;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -30,6 +27,7 @@ public class MainActivity extends CheckPermissionsActivity {
     private SimpleAdapter adapter;      //简单适配器
     private ListView MusicList;         // 音乐列表
     private List<Mp3Info> mp3Infos = null;
+    private TextView musicArtist;        //艺术家
     private TextView musicTitle;        //歌曲标题
     private TextView musicDuration;     //歌曲时间
     private Button musicPlaying;        //歌曲专辑
@@ -51,8 +49,8 @@ public class MainActivity extends CheckPermissionsActivity {
     }
 
     private void init() {
-        musicTitle = (TextView) findViewById(R.id.music_title);
-        musicDuration = (TextView) findViewById(R.id.music_duration);
+        musicArtist =(TextView) findViewById(R.id.music_Artist_tv);
+        musicTitle = (TextView) findViewById(R.id.music_Title_tv);
         singleSong_layout = (RelativeLayout) findViewById(R.id.singleSong_layout);
     }
 
@@ -63,6 +61,8 @@ public class MainActivity extends CheckPermissionsActivity {
             if (mp3Infos != null) {
                 Mp3Info mp3Info = mp3Infos.get(position);
                 Log.d("mp3Info-->", mp3Info.toString());
+                musicArtist.setText(mp3Info.getArtist());
+                musicTitle.setText(mp3Info.getTitle());
                 Intent intent = new Intent();
                 intent.putExtra("url", mp3Info.getUrl());
                 intent.putExtra("MSG", AppConstant.PlayerMsg.PLAY_MSG);
@@ -97,7 +97,7 @@ public class MainActivity extends CheckPermissionsActivity {
             }
         }
     }
-
+/*  //退出程序的对话框
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -124,7 +124,7 @@ public class MainActivity extends CheckPermissionsActivity {
         }
         return super.onKeyDown(keyCode, event);
     }
-
+*/
     @Override
     protected void onStop() {
         // TODO Auto-generated method stub

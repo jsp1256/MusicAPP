@@ -12,11 +12,22 @@ public class PlayerService extends Service {
 
     public PlayerService() {
     }
+/*
+    public class PlayBinder extends Binder{
+        public PlayerService getService(){return PlayerService.this;}
+    }
+
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new PlayBinder();
     }
+    public boolean onUnbind(Intent intent){
+        return super.onUnbind(intent);
+    }*/
+public IBinder onBind(Intent intent) {
+    return null;
+}
     public int onStartCommand(Intent intent, int flags, int startId){
         if(mediaPlayer.isPlaying()){
             stop();
@@ -73,7 +84,14 @@ public class PlayerService extends Service {
             }
         }
     }
-
+    /**
+     * 获取当前音乐播放进度
+     */
+    public long getCurrentProgress(){
+        if(mediaPlayer!=null)
+            return mediaPlayer.getCurrentPosition();
+        return 0;
+    }
     public void onDestroy() {
         if(mediaPlayer != null){
             mediaPlayer.stop();
