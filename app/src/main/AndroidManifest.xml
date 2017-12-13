@@ -22,7 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity android:name=".UiActivity"></activity>
         <service
             android:name=".PlayerService"
             android:enabled="true"
