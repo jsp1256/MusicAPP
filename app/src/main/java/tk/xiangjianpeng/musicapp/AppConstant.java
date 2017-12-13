@@ -20,8 +20,8 @@ public class AppConstant {
         public static final String SHUFFLE_ACTION = "tk.xiangjianpeng.action.SHUFFLE_ACTION";
     }
     public class Stautus{
-        private final int status_repeat_none = 0;      // 无重复播放
-        private final int status_repeat = 1;           // 全部循环
-        private final int status_repeat_onlyone = 2;   // 单曲循环
+        private static final int status_repeat_none = 0;      // 无重复播放
+        private static final int status_repeat = 1;           // 全部循环
+        private static final int status_repeat_onlyone = 2;   // 单曲循环
     }
 }
