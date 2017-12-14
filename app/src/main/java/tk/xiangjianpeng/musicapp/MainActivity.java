@@ -121,7 +121,7 @@ public class MainActivity extends CheckPermissionsActivity {
         }
     }
 /*  //退出程序的对话框
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
+    public boolean onKeyDown(int jspkeyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.getAction() == KeyEvent.ACTION_DOWN) {
 
