@@ -28,26 +28,30 @@ public class PlayerService extends Service {
         public PlayerService getService() {
             return PlayerService.this;
         }
+
         //获取当前曲目
-        public Mp3Info callgetlocalmusic(){
+        public Mp3Info callgetlocalmusic() {
             return getlocalmusic();
         }
+
         //获取当前播放位置
-        public int callgetposition(){
+        public int callgetposition() {
             return position;
         }
+
         //设置消息通信对象
-        public void callsetHandle(MainActivity.MusicHandle musicHandle1){
-            musicHandle=musicHandle1;
+        public void callsetHandle(MainActivity.MusicHandle musicHandle1) {
+            musicHandle = musicHandle1;
         }
     }
 
-    public void onCreate(){
-        mp3Infos=MediaUtils.getMp3Infos(this);   //获取歌曲对象集合
+    public void onCreate() {
+        mp3Infos = MediaUtils.getMp3Infos(this);   //获取歌曲对象集合
     }
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.e("SERVICE", "in onbind");
         return new PlayBinder();
     }
 
@@ -60,7 +64,7 @@ public class PlayerService extends Service {
             stop();
         }
         try {
-            position = intent.getIntExtra("position",0);
+            position = intent.getIntExtra("position", 0);
             int msg = intent.getIntExtra("MSG", 0);
             switch (msg) {
                 case AppConstant.PlayerMsg.PLAY_MSG:
@@ -78,12 +82,13 @@ public class PlayerService extends Service {
         }
         return super.onStartCommand(intent, flags, startId);
     }
+
     /**
      * 播放音乐
      */
     private void play(int position) {
         try {
-            Mp3Info mp3Info=mp3Infos.get(position);
+            Mp3Info mp3Info = mp3Infos.get(position);
             mediaPlayer.reset();//把各项参数恢复到初始状态
             mediaPlayer.setDataSource(mp3Info.getUrl());
             mediaPlayer.prepare();  //进行缓冲
@@ -99,9 +104,10 @@ public class PlayerService extends Service {
      */
     public void next() {
         if (position >= mp3Infos.size() - 1) {
-             play(0);
+            position = 0;
+        } else {
+            position++;
         }
-        position++;
         play(position);
     }
 
@@ -141,9 +147,10 @@ public class PlayerService extends Service {
     /**
      * 获取当前曲目
      */
-    public Mp3Info getlocalmusic(){
+    public Mp3Info getlocalmusic() {
         return mp3Infos.get(position);
     }
+
     public void onDestroy() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
@@ -169,13 +176,14 @@ public class PlayerService extends Service {
             }
         }
     }
-    private final class CompletionListener implements MediaPlayer.OnCompletionListener{
+
+    private final class CompletionListener implements MediaPlayer.OnCompletionListener {
 
         @Override
         public void onCompletion(MediaPlayer mediaPlayer) {
             next();
-            Message message=new Message();
-            message.what=AppConstant.ActionTypes.UPDATE_ACTION;
+            Message message = new Message();
+            message.what = AppConstant.ActionTypes.UPDATE_ACTION;
             musicHandle.sendMessage(message);
         }
     }

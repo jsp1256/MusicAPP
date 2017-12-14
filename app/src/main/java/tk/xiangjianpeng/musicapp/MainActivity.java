@@ -48,7 +48,7 @@ public class MainActivity extends CheckPermissionsActivity {
         mp3Infos=MediaUtils.getMp3Infos(getApplicationContext());   //获取歌曲对象集合
         setListAdpter(MediaUtils.getMusicMaps(mp3Infos));             //显示歌曲列表
         init(); //控件的初始化，设置监听器
-        ServiceBind(playServiceConnection);//绑定服务
+        ServiceBind();//绑定服务
     }
 
     private void init() {
@@ -68,13 +68,12 @@ public class MainActivity extends CheckPermissionsActivity {
     /**
      * bind服务绑定
      */
-    public PlayServiceConnection ServiceBind(PlayServiceConnection playServiceConnection){
+    public void ServiceBind(){
         if(playServiceConnection==null){
             playServiceConnection=new PlayServiceConnection();
         }
         Intent intent=new Intent(this,PlayerService.class);
         bindService(intent,playServiceConnection,BIND_AUTO_CREATE);
-        return playServiceConnection;
     }
 
     /**
@@ -93,8 +92,11 @@ public class MainActivity extends CheckPermissionsActivity {
      */
     private class PlayServiceConnection implements ServiceConnection{
         public void onServiceConnected(ComponentName name, IBinder PlayBind){
+            Log.e("ACTIVITY","in Service Onnected");
             playBinder= (PlayerService.PlayBinder) PlayBind;
+            Log.e("ACTIVITY",playBinder+"");
             playBinder.callsetHandle(musicHandle);
+            Log.e("ACTIVITY",musicHandle+"");
         }
         public void onServiceDisconnected(ComponentName name){}
     }
