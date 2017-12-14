@@ -1,12 +1,12 @@
 package tk.xiangjianpeng.musicapp;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -32,12 +32,12 @@ public class MainActivity extends CheckPermissionsActivity {
     private TextView musicArtist;        //艺术家
     private TextView musicTitle;        //歌曲标题
 
-    private PlayerService.PlayBinder playBinder;
+    private PlayServiceConnection playServiceConnection;//服务连接所需
+    private PlayerService.PlayBinder playBinder;        //连接成功返回的自定义iBinder对象
+    private MusicHandle musicHandle;                    //消息通信
 
-    private RelativeLayout singleSong_layout; //歌曲显示栏
-
-    private int listPosition = 0;   //标识列表位置
-    private MainReceiver mainReceiver;  //自定义的广播接收器
+    private RelativeLayout singleSong_layout;   //歌曲显示栏
+    private int listPosition = 0;               //标识当前列表位置
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +48,7 @@ public class MainActivity extends CheckPermissionsActivity {
         mp3Infos=MediaUtils.getMp3Infos(getApplicationContext());   //获取歌曲对象集合
         setListAdpter(MediaUtils.getMusicMaps(mp3Infos));             //显示歌曲列表
         init(); //控件的初始化，设置监听器
+        ServiceBind(playServiceConnection);//绑定服务
     }
 
     private void init() {
@@ -61,16 +62,39 @@ public class MainActivity extends CheckPermissionsActivity {
                 startActivity(intent);
             }
         });
-
-    }
-    //bind服务绑定
-    public void ServiceBind(View view){
-
+        musicHandle=new MusicHandle();
     }
 
+    /**
+     * bind服务绑定
+     */
+    public PlayServiceConnection ServiceBind(PlayServiceConnection playServiceConnection){
+        if(playServiceConnection==null){
+            playServiceConnection=new PlayServiceConnection();
+        }
+        Intent intent=new Intent(this,PlayerService.class);
+        bindService(intent,playServiceConnection,BIND_AUTO_CREATE);
+        return playServiceConnection;
+    }
+
+    /**
+     * bind服务解绑
+     */
+    public PlayServiceConnection ServiceUnbind(PlayServiceConnection playServiceConnection){
+        if(playServiceConnection!=null){
+            unbindService(playServiceConnection);
+            playServiceConnection=null;
+        }
+        return playServiceConnection;
+    }
+
+    /**
+     * 服务连接
+     */
     private class PlayServiceConnection implements ServiceConnection{
         public void onServiceConnected(ComponentName name, IBinder PlayBind){
             playBinder= (PlayerService.PlayBinder) PlayBind;
+            playBinder.callsetHandle(musicHandle);
         }
         public void onServiceDisconnected(ComponentName name){}
     }
@@ -83,6 +107,7 @@ public class MainActivity extends CheckPermissionsActivity {
         public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
             if (mp3Infos != null) {
                 Mp3Info mp3Info = mp3Infos.get(position);
+                listPosition=position;
                 Log.d("mp3Info-->", mp3Info.toString());
                 musicArtist.setText(mp3Info.getArtist());
                 musicTitle.setText(mp3Info.getTitle());
@@ -105,21 +130,6 @@ public class MainActivity extends CheckPermissionsActivity {
         MusicList.setAdapter(adapter);
     }
 
-    //自定义的BroadcastReceiver，负责监听从Service传回来的广播
-    public class MainReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if(action.equals(AppConstant.ActionTypes.UPDATE_ACTION)) {
-                //获取Intent中的current消息，current代表当前正在播放的歌曲
-                listPosition = intent.getIntExtra("current", -1);
-                if(listPosition >= 0) {
-                    musicTitle.setText(mp3Infos.get(listPosition).getTitle());
-                }
-            }
-        }
-    }
 /*  //退出程序的对话框
     public boolean onKeyDown(int jspkeyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
@@ -148,6 +158,17 @@ public class MainActivity extends CheckPermissionsActivity {
         return super.onKeyDown(keyCode, event);
     }
 */
+
+    public class MusicHandle extends Handler{
+        public void handleMessage(Message msg){
+            if(msg.what ==AppConstant.ActionTypes.UPDATE_ACTION){
+                Mp3Info mp3Info=playBinder.callgetlocalmusic();
+                listPosition=playBinder.callgetposition();
+                musicArtist.setText(mp3Info.getArtist());
+                musicTitle.setText(mp3Info.getTitle());
+            }
+        }
+    }
     @Override
     protected void onStop() {
         // TODO Auto-generated method stub
@@ -158,6 +179,7 @@ public class MainActivity extends CheckPermissionsActivity {
     @Override
     protected void onDestroy() {
         // TODO Auto-generated method stub
+        ServiceUnbind(playServiceConnection);
         super.onDestroy();
     }
 }

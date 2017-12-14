@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 
 import java.util.List;
@@ -13,11 +14,15 @@ public class PlayerService extends Service {
     private MediaPlayer mediaPlayer = new MediaPlayer();
     private boolean isPause;
     private List<Mp3Info> mp3Infos;
-    private int position;               //当前歌曲位置
+    private int position;                           //当前歌曲位置
+    private MainActivity.MusicHandle musicHandle;   //消息通信
 
     public PlayerService() {
     }
 
+    /**
+     * PlayBinder提供的通信
+     */
     public class PlayBinder extends Binder {
         //获取当前服务
         public PlayerService getService() {
@@ -26,6 +31,14 @@ public class PlayerService extends Service {
         //获取当前曲目
         public Mp3Info callgetlocalmusic(){
             return getlocalmusic();
+        }
+        //获取当前播放位置
+        public int callgetposition(){
+            return position;
+        }
+        //设置消息通信对象
+        public void callsetHandle(MainActivity.MusicHandle musicHandle1){
+            musicHandle=musicHandle1;
         }
     }
 
@@ -161,6 +174,9 @@ public class PlayerService extends Service {
         @Override
         public void onCompletion(MediaPlayer mediaPlayer) {
             next();
+            Message message=new Message();
+            message.what=AppConstant.ActionTypes.UPDATE_ACTION;
+            musicHandle.sendMessage(message);
         }
     }
 }
