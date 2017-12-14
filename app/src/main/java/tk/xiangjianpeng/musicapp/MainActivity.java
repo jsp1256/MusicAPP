@@ -45,10 +45,16 @@ public class MainActivity extends CheckPermissionsActivity {
         setContentView(R.layout.activity_main);
         MusicList = (ListView) findViewById(R.id.music_list);
         MusicList.setOnItemClickListener(new MusicListItemClickListener());
-        mp3Infos=MediaUtils.getMp3Infos(getApplicationContext());   //获取歌曲对象集合
-        setListAdpter(MediaUtils.getMusicMaps(mp3Infos));             //显示歌曲列表
         init(); //控件的初始化，设置监听器
         ServiceBind();//绑定服务
+    }
+    protected void onResume(){
+        super.onResume();
+        try{
+            mp3Infos=MediaUtils.getMp3Infos(getApplicationContext());   //获取歌曲对象集合
+            setListAdpter(MediaUtils.getMusicMaps(mp3Infos));             //显示歌曲列表
+            playBinder.callupdate();
+        }catch (Exception e){}
     }
 
     private void init() {

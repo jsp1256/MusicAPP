@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
@@ -35,6 +36,10 @@ public class CheckPermissionsActivity extends AppCompatActivity {
      * 判断是否需要检测，防止不停的弹框
      */
     private boolean isNeedCheck = true;
+
+    protected void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     protected void onResume() {
