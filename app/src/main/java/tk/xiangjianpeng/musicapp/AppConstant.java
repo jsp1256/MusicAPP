@@ -19,9 +19,11 @@ public class AppConstant {
         public static final int REPEAT_ACTION = 7;
         public static final int SHUFFLE_ACTION = 8;
     }
-    public class Stautus{
-        private static final int status_repeat_none = 9;      // 无重复播放
-        private static final int status_repeat = 10;           // 全部循环
-        private static final int status_repeat_onlyone = 11;   // 单曲循环
+    public class Status{
+        public static final int status_repeat_none = 9;      // 无重复播放
+        public static final int status_repeat = 10;           // 全部循环
+        public static final int status_repeat_onlyone = 11;   // 单曲循环
+        public static final int status_random_none=12;
+        public static final int status_random=13;
     }
 }

@@ -9,12 +9,14 @@ public class Player_Status {
     private int repeat_status;
     private boolean isPlay;
     private boolean isPause;
+    private boolean isPlayed;
 
-    public Player_Status(int random_status, int repeat_status, boolean isPlay, boolean isPause) {
+    public Player_Status(int random_status, int repeat_status, boolean isPlay, boolean isPause, boolean isPlayed) {
         this.random_status = random_status;
         this.repeat_status = repeat_status;
         this.isPlay = isPlay;
         this.isPause = isPause;
+        this.isPlayed = isPlayed;
     }
 
     public int getRandom_status() {
@@ -33,6 +35,10 @@ public class Player_Status {
         return isPause;
     }
 
+    public boolean isPlayed() {
+        return isPlayed;
+    }
+
     public void setRandom_status(int random_status) {
         this.random_status = random_status;
     }
@@ -47,5 +53,9 @@ public class Player_Status {
 
     public void setPause(boolean pause) {
         isPause = pause;
+    }
+
+    public void setPlayed(boolean played) {
+        isPlayed = played;
     }
 }

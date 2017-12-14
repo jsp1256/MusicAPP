@@ -56,13 +56,14 @@ public class MediaUtils {
 
     /**
      * 往List集合中添加Map对象数据，每一个Map对象存放一首音乐的所有属性
+     *
      * @param mp3Infos
      * @return
      */
     public static List<HashMap<String, String>> getMusicMaps(
             List<Mp3Info> mp3Infos) {
         List<HashMap<String, String>> mp3list = new ArrayList<HashMap<String, String>>();
-        for (Iterator iterator = mp3Infos.iterator(); iterator.hasNext();) {
+        for (Iterator iterator = mp3Infos.iterator(); iterator.hasNext(); ) {
             Mp3Info mp3Info = (Mp3Info) iterator.next();
             HashMap<String, String> map = new HashMap<String, String>();
             map.put("title", mp3Info.getTitle());
@@ -77,6 +78,7 @@ public class MediaUtils {
 
     /**
      * 格式化时间，将毫秒转换为分:秒格式
+     *
      * @param time
      * @return
      */

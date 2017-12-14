@@ -12,10 +12,11 @@ import java.util.List;
 
 public class PlayerService extends Service {
     private MediaPlayer mediaPlayer = new MediaPlayer();
-    private boolean isPause;
+    private Player_Status player_status;
     private List<Mp3Info> mp3Infos;
     private int position;                           //当前歌曲位置
-    private MainActivity.MusicHandle musicHandle;   //消息通信
+    private MainActivity.MainHandle mainHandle;   //主界面消息通信
+    private UiActivity.UiHandle uiHandle;           //UI界面消息通信
 
     public PlayerService() {
     }
@@ -39,19 +40,38 @@ public class PlayerService extends Service {
             return position;
         }
 
-        //设置消息通信对象
-        public void callsetHandle(MainActivity.MusicHandle musicHandle1) {
-            musicHandle = musicHandle1;
+        //获取当前播放器状态
+        public Player_Status callgetPlayer_status() {
+            return getPlayer_status();
+        }
+
+        //设置主界面消息通信对象
+        public void callsetMainHandle(MainActivity.MainHandle mainHandle1) {
+            mainHandle = mainHandle1;
+        }
+
+        //设置UI界面消息通信对象
+        public void callsetUiHandle(UiActivity.UiHandle uiHandle1) {
+            uiHandle = uiHandle1;
+        }
+
+        //更新音乐列表
+        public void callupdate() {
+            update();
+        }
+
+        //下一首
+        public void callnext() {
+            next();
         }
     }
 
     public void onCreate() {
-        mp3Infos = MediaUtils.getMp3Infos(this);   //获取歌曲对象集合
+        player_status = new Player_Status(AppConstant.Status.status_random_none, AppConstant.Status.status_repeat, false, false, false);
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.e("SERVICE", "in onbind");
         return new PlayBinder();
     }
 
@@ -84,18 +104,37 @@ public class PlayerService extends Service {
     }
 
     /**
+     * 更新乐曲库
+     */
+    private void update() {
+        try {
+            mp3Infos = MediaUtils.getMp3Infos(this);   //获取歌曲对象集合
+        } catch (Exception e) {
+            Log.e("service_error:", e.toString());
+        }
+    }
+
+    /**
      * 播放音乐
      */
     private void play(int position) {
-        try {
-            Mp3Info mp3Info = mp3Infos.get(position);
-            mediaPlayer.reset();//把各项参数恢复到初始状态
-            mediaPlayer.setDataSource(mp3Info.getUrl());
-            mediaPlayer.prepare();  //进行缓冲
-            mediaPlayer.setOnPreparedListener(new PreparedListener(position));//注册一个监听器
-            mediaPlayer.setOnCompletionListener(new CompletionListener());
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (player_status.isPause()) {
+            player_status.setPause(false);
+            player_status.setPlay(true);
+            mediaPlayer.start();
+        } else {
+            try {
+                player_status.setPlay(true);
+                player_status.setPlayed(true);
+                Mp3Info mp3Info = mp3Infos.get(position);
+                mediaPlayer.reset();//把各项参数恢复到初始状态
+                mediaPlayer.setDataSource(mp3Info.getUrl());
+                mediaPlayer.prepare();  //进行缓冲
+                mediaPlayer.setOnPreparedListener(new PreparedListener(position));//注册一个监听器
+                mediaPlayer.setOnCompletionListener(new CompletionListener());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -117,7 +156,8 @@ public class PlayerService extends Service {
     private void pause() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
-            isPause = true;
+            player_status.setPlay(false);
+            player_status.setPause(true);
         }
     }
 
@@ -127,12 +167,24 @@ public class PlayerService extends Service {
     private void stop() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
+            player_status.setPlay(false);
             try {
                 mediaPlayer.prepare(); // 在调用stop后如果需要再次通过start进行播放,需要之前调用prepare函数
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * 获取随机位置
+     *
+     * @param end
+     * @return
+     */
+    private int getRandomIndex(int end) {
+        int index = (int) (Math.random() * end);
+        return index;
     }
 
     /**
@@ -149,6 +201,13 @@ public class PlayerService extends Service {
      */
     public Mp3Info getlocalmusic() {
         return mp3Infos.get(position);
+    }
+
+    /**
+     * 获取当前播放器状态
+     */
+    public Player_Status getPlayer_status() {
+        return player_status;
     }
 
     public void onDestroy() {
@@ -184,7 +243,8 @@ public class PlayerService extends Service {
             next();
             Message message = new Message();
             message.what = AppConstant.ActionTypes.UPDATE_ACTION;
-            musicHandle.sendMessage(message);
+            if (mainHandle != null) mainHandle.sendMessage(message);
+            if (uiHandle != null) uiHandle.sendMessage(message);
         }
     }
 }

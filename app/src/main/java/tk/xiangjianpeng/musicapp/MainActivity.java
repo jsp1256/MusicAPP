@@ -53,7 +53,6 @@ public class MainActivity extends CheckPermissionsActivity {
         try{
             mp3Infos=MediaUtils.getMp3Infos(getApplicationContext());   //获取歌曲对象集合
             setListAdpter(MediaUtils.getMusicMaps(mp3Infos));             //显示歌曲列表
-            playBinder.callupdate();
         }catch (Exception e){}
     }
 
@@ -98,6 +97,7 @@ public class MainActivity extends CheckPermissionsActivity {
         public void onServiceConnected(ComponentName name, IBinder PlayBind){
             playBinder= (PlayerService.PlayBinder) PlayBind;
             playBinder.callsetMainHandle(mainHandle);
+            playBinder.callupdate();
         }
         public void onServiceDisconnected(ComponentName name){}
     }
