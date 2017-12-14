@@ -34,7 +34,7 @@ public class MainActivity extends CheckPermissionsActivity {
 
     private PlayServiceConnection playServiceConnection;//服务连接所需
     private PlayerService.PlayBinder playBinder;        //连接成功返回的自定义iBinder对象
-    private MusicHandle musicHandle;                    //消息通信
+    private MainHandle mainHandle;                    //消息通信
 
     private RelativeLayout singleSong_layout;   //歌曲显示栏
     private int listPosition = 0;               //标识当前列表位置
@@ -62,9 +62,8 @@ public class MainActivity extends CheckPermissionsActivity {
                 startActivity(intent);
             }
         });
-        musicHandle=new MusicHandle();
+        mainHandle=new MainHandle();
     }
-
     /**
      * bind服务绑定
      */
@@ -79,12 +78,11 @@ public class MainActivity extends CheckPermissionsActivity {
     /**
      * bind服务解绑
      */
-    public PlayServiceConnection ServiceUnbind(PlayServiceConnection playServiceConnection){
+    public void ServiceUnbind(){
         if(playServiceConnection!=null){
             unbindService(playServiceConnection);
             playServiceConnection=null;
         }
-        return playServiceConnection;
     }
 
     /**
@@ -92,11 +90,8 @@ public class MainActivity extends CheckPermissionsActivity {
      */
     private class PlayServiceConnection implements ServiceConnection{
         public void onServiceConnected(ComponentName name, IBinder PlayBind){
-            Log.e("ACTIVITY","in Service Onnected");
             playBinder= (PlayerService.PlayBinder) PlayBind;
-            Log.e("ACTIVITY",playBinder+"");
-            playBinder.callsetHandle(musicHandle);
-            Log.e("ACTIVITY",musicHandle+"");
+            playBinder.callsetMainHandle(mainHandle);
         }
         public void onServiceDisconnected(ComponentName name){}
     }
@@ -161,7 +156,7 @@ public class MainActivity extends CheckPermissionsActivity {
     }
 */
 
-    public class MusicHandle extends Handler{
+    public class MainHandle extends Handler{
         public void handleMessage(Message msg){
             if(msg.what ==AppConstant.ActionTypes.UPDATE_ACTION){
                 Mp3Info mp3Info=playBinder.callgetlocalmusic();
@@ -181,7 +176,7 @@ public class MainActivity extends CheckPermissionsActivity {
     @Override
     protected void onDestroy() {
         // TODO Auto-generated method stub
-        ServiceUnbind(playServiceConnection);
+        ServiceUnbind();
         super.onDestroy();
     }
 }
