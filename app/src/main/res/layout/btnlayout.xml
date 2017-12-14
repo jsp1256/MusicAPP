@@ -23,7 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/audioTrack"
-            android:text="0:25" />
+            android:text="0:00" />
 
         <TextView
             android:id="@+id/final_progress"
@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_below="@id/audioTrack"
-            android:text="3:59" />
+            android:text="00:00" />
     </RelativeLayout>
 
     <LinearLayout
