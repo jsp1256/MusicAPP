@@ -64,7 +64,7 @@
             android:background="@drawable/play_selector" />
 
         <Button
-            android:id="@+id/shuffle_music"
+            android:id="@+id/random_music"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/play_music"
