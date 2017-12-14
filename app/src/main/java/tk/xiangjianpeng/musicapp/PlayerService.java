@@ -14,14 +14,18 @@ public class PlayerService extends Service {
     private boolean isPause;
     private List<Mp3Info> mp3Infos;
     private int position;               //当前歌曲位置
-    private boolean isPlaying=false;    //当前播放器状态
 
     public PlayerService() {
     }
 
     public class PlayBinder extends Binder {
+        //获取当前服务
         public PlayerService getService() {
             return PlayerService.this;
+        }
+        //获取当前曲目
+        public Mp3Info callgetlocalmusic(){
+            return getlocalmusic();
         }
     }
 
@@ -61,23 +65,8 @@ public class PlayerService extends Service {
         }
         return super.onStartCommand(intent, flags, startId);
     }
-/*
-    private class ListenerRunable implements Runnable{
-
-        @Override
-        public void run() {
-            while (isPlaying){
-                if(!mediaPlayer.isPlaying()){next();Log.i("runablenext","自动播放下一曲");}
-                Log.i("runablemsg","监听运行");
-                SystemClock.sleep(200);
-            }
-        }
-    }
-*/
     /**
      * 播放音乐
-     *
-     * @param position
      */
     private void play(int position) {
         try {
@@ -94,8 +83,6 @@ public class PlayerService extends Service {
 
     /**
      * 下一曲
-     *
-     * 当前播放的位置
      */
     public void next() {
         if (position >= mp3Infos.size() - 1) {
@@ -121,7 +108,6 @@ public class PlayerService extends Service {
     private void stop() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
-            isPlaying=false;
             try {
                 mediaPlayer.prepare(); // 在调用stop后如果需要再次通过start进行播放,需要之前调用prepare函数
             } catch (Exception e) {
@@ -139,6 +125,12 @@ public class PlayerService extends Service {
         return 0;
     }
 
+    /**
+     * 获取当前曲目
+     */
+    public Mp3Info getlocalmusic(){
+        return mp3Infos.get(position);
+    }
     public void onDestroy() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();

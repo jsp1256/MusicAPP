@@ -74,7 +74,9 @@ public class MainActivity extends CheckPermissionsActivity {
         }
         public void onServiceDisconnected(ComponentName name){}
     }
-
+    /**
+     * ListView条目点击监听器
+     */
     private class MusicListItemClickListener implements AdapterView.OnItemClickListener {
 
         @Override
