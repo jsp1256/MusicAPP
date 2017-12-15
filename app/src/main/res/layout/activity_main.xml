@@ -18,6 +18,10 @@
         android:layout_above="@+id/singleSong_layout">
     </ListView>
 
+    <include layout="@layout/menutab_layout"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_below="@+id/music_list"/>
     <RelativeLayout
         android:id="@+id/singleSong_layout"
         android:layout_width="match_parent"
