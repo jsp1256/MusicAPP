@@ -14,18 +14,12 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends CheckPermissionsActivity {
-    private int repeatState;                        //循环标识
-    private boolean isFirstTime = true;             // 是否是第一次
-    private boolean isPlaying;                      // 正在播放
-    private boolean isPause;                        // 暂停
-    private boolean isNoneShuffle = true;           // 顺序播放
-    private boolean isShuffle = false;              // 随机播放
-
     private SimpleAdapter adapter;      //简单适配器
     private ListView MusicList;         // 音乐列表
     private List<Mp3Info> mp3Infos = null;
@@ -48,59 +42,59 @@ public class MainActivity extends CheckPermissionsActivity {
         init(); //控件的初始化，设置监听器
         ServiceBind();//绑定服务
     }
-    protected void onResume(){
-        super.onResume();
-        try{
-            mp3Infos=MediaUtils.getMp3Infos(getApplicationContext());   //获取歌曲对象集合
-            setListAdpter(MediaUtils.getMusicMaps(mp3Infos));             //显示歌曲列表
-        }catch (Exception e){}
-    }
 
     private void init() {
-        musicArtist =(TextView) findViewById(R.id.music_Artist_tv);
+        musicArtist = (TextView) findViewById(R.id.music_Artist_tv);
         musicTitle = (TextView) findViewById(R.id.music_Title_tv);
         singleSong_layout = (RelativeLayout) findViewById(R.id.singleSong_layout);
         singleSong_layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent(MainActivity.this,UiActivity.class);
+                Intent intent = new Intent(MainActivity.this, UiActivity.class);
                 startActivity(intent);
             }
         });
-        mainHandle=new MainHandle();
+        mainHandle = new MainHandle();
     }
+
     /**
      * bind服务绑定
      */
-    public void ServiceBind(){
-        if(playServiceConnection==null){
-            playServiceConnection=new PlayServiceConnection();
+    public void ServiceBind() {
+        if (playServiceConnection == null) {
+            playServiceConnection = new PlayServiceConnection();
         }
-        Intent intent=new Intent(this,PlayerService.class);
-        bindService(intent,playServiceConnection,BIND_AUTO_CREATE);
+        Intent intent = new Intent(this, PlayerService.class);
+        bindService(intent, playServiceConnection, BIND_AUTO_CREATE);
     }
 
     /**
      * bind服务解绑
      */
-    public void ServiceUnbind(){
-        if(playServiceConnection!=null){
+    public void ServiceUnbind() {
+        if (playServiceConnection != null) {
             unbindService(playServiceConnection);
-            playServiceConnection=null;
+            playServiceConnection = null;
         }
     }
 
     /**
      * 服务连接
      */
-    private class PlayServiceConnection implements ServiceConnection{
-        public void onServiceConnected(ComponentName name, IBinder PlayBind){
-            playBinder= (PlayerService.PlayBinder) PlayBind;
+    private class PlayServiceConnection implements ServiceConnection {
+        public void onServiceConnected(ComponentName name, IBinder PlayBind) {
+            playBinder = (PlayerService.PlayBinder) PlayBind;
             playBinder.callsetMainHandle(mainHandle);
             playBinder.callupdate();
+            if (playBinder.callgetPlayer_status().isPlay()) {
+                setMenuInfo(playBinder.callgetlocalmusic());
+            }
         }
-        public void onServiceDisconnected(ComponentName name){}
+
+        public void onServiceDisconnected(ComponentName name) {
+        }
     }
+
     /**
      * ListView条目点击监听器
      */
@@ -110,10 +104,9 @@ public class MainActivity extends CheckPermissionsActivity {
         public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
             if (mp3Infos != null) {
                 Mp3Info mp3Info = mp3Infos.get(position);
-                listPosition=position;
+                listPosition = position;
                 Log.d("mp3Info-->", mp3Info.toString());
-                musicArtist.setText(mp3Info.getArtist());
-                musicTitle.setText(mp3Info.getTitle());
+                setMenuInfo(mp3Info);
                 Intent intent = new Intent();
                 intent.putExtra("position", position);
                 intent.putExtra("MSG", AppConstant.PlayerMsg.PLAY_MSG);
@@ -122,14 +115,25 @@ public class MainActivity extends CheckPermissionsActivity {
             }
         }
     }
+
+    /**
+     * 设置下部菜单栏显示文本
+     *
+     * @param mp3Info
+     */
+    private void setMenuInfo(Mp3Info mp3Info) {
+        musicArtist.setText(mp3Info.getArtist());
+        musicTitle.setText(mp3Info.getTitle());
+    }
+
     /**
      * 填充列表(List<HashMap<String, String>>)
      */
     public void setListAdpter(List<HashMap<String, String>> mp3list) {
         adapter = new SimpleAdapter(this, mp3list,
-                R.layout.music_list_layout, new String[] { "title",
-                "Artist", "duration" }, new int[] { R.id.music_title,
-                R.id.music_Artist, R.id.music_duration });
+                R.layout.music_list_layout, new String[]{"title",
+                "Artist", "duration"}, new int[]{R.id.music_title,
+                R.id.music_Artist, R.id.music_duration});
         MusicList.setAdapter(adapter);
     }
 
@@ -162,17 +166,32 @@ public class MainActivity extends CheckPermissionsActivity {
     }
 */
 
-    public class MainHandle extends Handler{
-        public void handleMessage(Message msg){
-            if(msg.what ==AppConstant.ActionTypes.UPDATE_ACTION){
-                Mp3Info mp3Info=playBinder.callgetlocalmusic();
-                listPosition=playBinder.callgetposition();
-                musicArtist.setText(mp3Info.getArtist());
-                musicTitle.setText(mp3Info.getTitle());
+    public class MainHandle extends Handler {
+        public void handleMessage(Message msg) {
+            if (msg.what == AppConstant.ActionTypes.UPDATE_ACTION) {
+                try {
+                    Mp3Info mp3Info = playBinder.callgetlocalmusic();
+                    listPosition = playBinder.callgetposition();
+                    setMenuInfo(mp3Info);
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "好像出了点错误哦！", Toast.LENGTH_SHORT);
+                }
             }
         }
     }
+
     @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            mp3Infos = MediaUtils.getMp3Infos(getApplicationContext());   //获取歌曲对象集合
+            setListAdpter(MediaUtils.getMusicMaps(mp3Infos));             //显示歌曲列表
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     protected void onStop() {
         // TODO Auto-generated method stub
         super.onStop();
@@ -183,6 +202,8 @@ public class MainActivity extends CheckPermissionsActivity {
     protected void onDestroy() {
         // TODO Auto-generated method stub
         ServiceUnbind();
+        // Intent intent=new Intent(this,PlayerService.class);
+        //stopService(intent);
         super.onDestroy();
     }
 }

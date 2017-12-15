@@ -7,6 +7,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class PlayerService extends Service {
     private int position;                           //当前歌曲位置
     private MainActivity.MainHandle mainHandle;   //主界面消息通信
     private UiActivity.UiHandle uiHandle;           //UI界面消息通信
+    DelayThread delayThread = new DelayThread(200);
 
     public PlayerService() {
     }
@@ -26,48 +28,64 @@ public class PlayerService extends Service {
      */
     public class PlayBinder extends Binder {
         //获取当前服务
-        public PlayerService getService() {
+        protected PlayerService getService() {
             return PlayerService.this;
         }
 
         //获取当前曲目
-        public Mp3Info callgetlocalmusic() {
+        protected Mp3Info callgetlocalmusic() {
             return getlocalmusic();
         }
 
         //获取当前播放位置
-        public int callgetposition() {
+        protected int callgetposition() {
             return position;
         }
 
+        //获取当前音乐播放进度
+        protected long callgetCurrentProgress() {
+            return getCurrentProgress();
+        }
+
         //获取当前播放器状态
-        public Player_Status callgetPlayer_status() {
+        protected Player_Status callgetPlayer_status() {
             return getPlayer_status();
         }
 
         //设置主界面消息通信对象
-        public void callsetMainHandle(MainActivity.MainHandle mainHandle1) {
+        protected void callsetMainHandle(MainActivity.MainHandle mainHandle1) {
             mainHandle = mainHandle1;
         }
 
+        //播放指定位置
+        protected void callPlayPosition(int position) {
+            seekTo(position);
+        }
+
         //设置UI界面消息通信对象
-        public void callsetUiHandle(UiActivity.UiHandle uiHandle1) {
+        protected void callsetUiHandle(UiActivity.UiHandle uiHandle1) {
             uiHandle = uiHandle1;
         }
 
         //更新音乐列表
-        public void callupdate() {
+        protected void callupdate() {
             update();
         }
 
+        //上一首
+        protected void callprevious() {
+            previous();
+        }
+
         //下一首
-        public void callnext() {
+        protected void callnext() {
             next();
         }
     }
 
     public void onCreate() {
         player_status = new Player_Status(AppConstant.Status.status_random_none, AppConstant.Status.status_repeat, false, false, false);
+        delayThread.start();
     }
 
     @Override
@@ -133,21 +151,46 @@ public class PlayerService extends Service {
                 mediaPlayer.setOnPreparedListener(new PreparedListener(position));//注册一个监听器
                 mediaPlayer.setOnCompletionListener(new CompletionListener());
             } catch (Exception e) {
-                e.printStackTrace();
+                Toast.makeText(this, "播放器错误，找不到文件！", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    /**
+     * 调整播放进度
+     *
+     * @param position
+     */
+    private void seekTo(int position) {
+        mediaPlayer.seekTo(position);
+    }
+
+    /**
+     * 上一曲
+     */
+    public void previous() {
+        if(!player_status.isPlayed()) return;
+        if (position == 0) {
+            position = mp3Infos.size();
+        } else {
+            position--;
+        }
+        play(position);
+        msgSend_Update();
     }
 
     /**
      * 下一曲
      */
     public void next() {
+        if(!player_status.isPlayed()) return;
         if (position >= mp3Infos.size() - 1) {
             position = 0;
         } else {
             position++;
         }
         play(position);
+        msgSend_Update();
     }
 
     /**
@@ -210,13 +253,6 @@ public class PlayerService extends Service {
         return player_status;
     }
 
-    public void onDestroy() {
-        if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
-        }
-    }
-
     /**
      * 实现一个OnPrepareLister接口,当音乐准备好的时候开始播放
      */
@@ -236,15 +272,70 @@ public class PlayerService extends Service {
         }
     }
 
+    /**
+     * 消息发送机制：更新操作
+     */
+    private void msgSend_Update(){
+        Message message = new Message();
+        message.what = AppConstant.ActionTypes.UPDATE_ACTION;
+        try {
+            if (mainHandle != null) mainHandle.sendMessage(message);
+            if (uiHandle != null) uiHandle.sendMessage(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 实现一个OnCompletionListener接口,当音乐播放完成时执行操作
+     */
     private final class CompletionListener implements MediaPlayer.OnCompletionListener {
 
         @Override
         public void onCompletion(MediaPlayer mediaPlayer) {
             next();
-            Message message = new Message();
-            message.what = AppConstant.ActionTypes.UPDATE_ACTION;
-            if (mainHandle != null) mainHandle.sendMessage(message);
-            if (uiHandle != null) uiHandle.sendMessage(message);
         }
+
+    }
+
+    /**
+     * 实现一个延时线程，每隔一段时间发消息更新播放进度
+     */
+    public class DelayThread extends Thread {
+        long delaytime;
+
+        public DelayThread(long i) {
+            delaytime = i;
+        }
+
+        public void run() {
+            while (true) {
+                try {
+                    sleep(delaytime);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //Log.i("delaythread-->", "" + uiHandle);
+                try {
+                    if (player_status.isPlay()) {
+                        if (uiHandle != null) {
+                            Message message = new Message();
+                            message.what = AppConstant.ActionTypes.MUSIC_CURRENT;
+                            uiHandle.sendMessage(message);
+                        }
+                    }
+                } catch (Exception e) {
+                    //e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void onDestroy() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        }
+        super.onDestroy();
     }
 }

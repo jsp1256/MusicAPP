@@ -48,11 +48,12 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ui_layout);
-        ServiceBind();
         init();
+        ServiceBind();
     }
 
     private void init() {
+        uiHandle = new UiHandle();
         mainBtn = (Button) findViewById(R.id.btn_to_main);
         previousBtn = (Button) findViewById(R.id.previous_music);
         repeatBtn = (Button) findViewById(R.id.repeat_music);
@@ -71,6 +72,9 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
         playBtn.setOnClickListener(this);
         randomBtn.setOnClickListener(this);
         nextBtn.setOnClickListener(this);
+
+        audioTrack.setMax(1000);
+        audioTrack.setOnSeekBarChangeListener(new SeekBarChangeListener());
     }
 
     private void initView() {
@@ -79,9 +83,7 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
         //静态变量初始化
         if (player_status.isPlayed()) {
             Mp3Info mp3Info = playBinder.callgetlocalmusic();
-            musicArtist.setText(mp3Info.getArtist());
-            musicTitle.setText(mp3Info.getTitle());
-            final_progress.setText(MediaUtils.formatTime(mp3Info.getDuration()));
+            setStaticValue(mp3Info);
         }
         //动态按钮初始化
         setPlayBtn(player_status);
@@ -122,6 +124,17 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
 
         public void onServiceDisconnected(ComponentName name) {
         }
+    }
+
+    /**
+     * 设置页面静态变量
+     *
+     * @param mp3Info
+     */
+    private void setStaticValue(Mp3Info mp3Info) {
+        musicArtist.setText(mp3Info.getArtist());
+        musicTitle.setText(mp3Info.getTitle());
+        final_progress.setText(MediaUtils.formatTime(mp3Info.getDuration()));
     }
 
     /**
@@ -172,6 +185,11 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
         }
     }
 
+    /**
+     * 页面按钮点击监听器
+     *
+     * @param view
+     */
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -179,13 +197,57 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
                 Intent intent = new Intent(UiActivity.this, MainActivity.class);
                 startActivity(intent);
                 break;
+            case R.id.previous_music:
+                playBinder.callprevious();
+                break;
+            case R.id.next_music:
+                playBinder.callnext();
+        }
+    }
+
+    /**
+     * 进度条点击事件监听器
+     */
+    private class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener{
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if(fromUser){
+                int dest=seekBar.getProgress();
+                int musicMax=(int)playBinder.callgetlocalmusic().getDuration();
+                int audioTrackMax=audioTrack.getMax();
+                playBinder.callPlayPosition(musicMax*dest/audioTrackMax);
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
 
         }
     }
 
-
+    /**
+     * 接受来自PlayerService的消息，控制页面刷新
+     */
     public class UiHandle extends Handler {
-        public void handleMessage(Message message) {
+        public void handleMessage(Message msg) {
+            if (msg.what == AppConstant.ActionTypes.UPDATE_ACTION) {
+                Mp3Info mp3Info = playBinder.callgetlocalmusic();
+                setStaticValue(mp3Info);
+            }
+            if (msg.what == AppConstant.ActionTypes.MUSIC_CURRENT) {
+                float position = playBinder.callgetCurrentProgress();
+                current_progress.setText(MediaUtils.formatTime(playBinder.callgetCurrentProgress()));
+                Mp3Info mp3Info = playBinder.callgetlocalmusic();
+                float musicMax = mp3Info.getDuration();
+                float audiotrackMax = audioTrack.getMax();
+                audioTrack.setProgress((int) (audiotrackMax * position / musicMax));
+            }
         }
     }
 
