@@ -16,7 +16,7 @@ public class PlayerService extends Service {
     private Player_Status player_status;
     private List<Mp3Info> mp3Infos;
     private int position;                           //当前歌曲位置
-    private MainActivity.MainHandle mainHandle;   //主界面消息通信
+    private MainActivity.MainHandle mainHandle;     //主界面消息通信
     private UiActivity.UiHandle uiHandle;           //UI界面消息通信
     DelayThread delayThread = new DelayThread(200);
 
@@ -74,12 +74,35 @@ public class PlayerService extends Service {
 
         //上一首
         protected void callprevious() {
-            previous();
+            player_status.setPause(false);
+            if (player_status.getRandom_status() == AppConstant.Status.status_random)
+                playRandom();
+            else
+                previous();
         }
 
         //下一首
         protected void callnext() {
-            next();
+            player_status.setPause(false);
+            if (player_status.getRandom_status() == AppConstant.Status.status_random)
+                playRandom();
+            else
+                next();
+        }
+
+        //播放/继续
+        protected void callplay_pause() {
+            play_pause();
+        }
+
+        //设置播放器状态：随机
+        protected void callsetRandom() {
+            setRandom();
+        }
+
+        //设置播放器状态：循环
+        protected void callsetRepeat() {
+            setRepeat();
         }
     }
 
@@ -111,9 +134,6 @@ public class PlayerService extends Service {
                 case AppConstant.PlayerMsg.STOP_MSG:
                     stop();
                     break;
-                case AppConstant.PlayerMsg.PAUSE_MSG:
-                    pause();
-                    break;
             }
         } catch (Exception e) {
             Log.e("start-error:", e.toString());
@@ -133,26 +153,20 @@ public class PlayerService extends Service {
     }
 
     /**
-     * 播放音乐
+     * 播放指定位置的音乐
      */
     private void play(int position) {
-        if (player_status.isPause()) {
-            player_status.setPause(false);
+        try {
             player_status.setPlay(true);
-            mediaPlayer.start();
-        } else {
-            try {
-                player_status.setPlay(true);
-                player_status.setPlayed(true);
-                Mp3Info mp3Info = mp3Infos.get(position);
-                mediaPlayer.reset();//把各项参数恢复到初始状态
-                mediaPlayer.setDataSource(mp3Info.getUrl());
-                mediaPlayer.prepare();  //进行缓冲
-                mediaPlayer.setOnPreparedListener(new PreparedListener(position));//注册一个监听器
-                mediaPlayer.setOnCompletionListener(new CompletionListener());
-            } catch (Exception e) {
-                Toast.makeText(this, "播放器错误，找不到文件！", Toast.LENGTH_SHORT).show();
-            }
+            player_status.setPlayed(true);
+            Mp3Info mp3Info = mp3Infos.get(position);
+            mediaPlayer.reset();//把各项参数恢复到初始状态
+            mediaPlayer.setDataSource(mp3Info.getUrl());
+            mediaPlayer.prepare();  //进行缓冲
+            mediaPlayer.setOnPreparedListener(new PreparedListener(position));//注册一个监听器
+            mediaPlayer.setOnCompletionListener(new CompletionListener());
+        } catch (Exception e) {
+            Toast.makeText(this, "播放器错误，找不到文件！", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -169,9 +183,9 @@ public class PlayerService extends Service {
      * 上一曲
      */
     public void previous() {
-        if(!player_status.isPlayed()) return;
+        if (!player_status.isPlayed()) return;
         if (position == 0) {
-            position = mp3Infos.size();
+            position = mp3Infos.size() - 1;
         } else {
             position--;
         }
@@ -183,8 +197,17 @@ public class PlayerService extends Service {
      * 下一曲
      */
     public void next() {
-        if(!player_status.isPlayed()) return;
+        if (!player_status.isPlayed()) return;
+        if (player_status.getRepeat_status() == AppConstant.Status.status_repeat_onlyone) {
+            play(position);
+            return;
+        }
         if (position >= mp3Infos.size() - 1) {
+            if (player_status.getRepeat_status() == AppConstant.Status.status_repeat_none) {
+                stop();
+                msgSend_Complete();
+                return;
+            }
             position = 0;
         } else {
             position++;
@@ -194,13 +217,20 @@ public class PlayerService extends Service {
     }
 
     /**
-     * 暂停音乐
+     * 暂停/继续播放音乐
      */
-    private void pause() {
+    private void play_pause() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             player_status.setPlay(false);
             player_status.setPause(true);
+        } else if (mediaPlayer != null && player_status.isPause()) {
+            player_status.setPause(false);
+            player_status.setPlay(true);
+            mediaPlayer.start();
+        }else if (mediaPlayer != null && !mediaPlayer.isPlaying()){
+            player_status.setPlay(true);
+            play(position);
         }
     }
 
@@ -212,7 +242,7 @@ public class PlayerService extends Service {
             mediaPlayer.stop();
             player_status.setPlay(false);
             try {
-                mediaPlayer.prepare(); // 在调用stop后如果需要再次通过start进行播放,需要之前调用prepare函数
+                //mediaPlayer.prepare(); // 在调用stop后如果需要再次通过start进行播放,需要之前调用prepare函数
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -220,14 +250,12 @@ public class PlayerService extends Service {
     }
 
     /**
-     * 获取随机位置
-     *
-     * @param end
-     * @return
+     * 随机播放音乐
      */
-    private int getRandomIndex(int end) {
-        int index = (int) (Math.random() * end);
-        return index;
+    private void playRandom() {
+        position = (int) (Math.random() * mp3Infos.size());
+        play(position);
+        msgSend_Update();
     }
 
     /**
@@ -254,6 +282,31 @@ public class PlayerService extends Service {
     }
 
     /**
+     * 设置播放器状态：随机
+     */
+    public void setRandom() {
+        if (player_status.getRandom_status() == AppConstant.Status.status_random)
+            player_status.setRandom_status(AppConstant.Status.status_random_none);
+        else player_status.setRandom_status(AppConstant.Status.status_random);
+    }
+
+    /**
+     * 设置播放器状态：重复
+     */
+    public void setRepeat() {
+        switch (player_status.getRepeat_status()) {
+            case AppConstant.Status.status_repeat:
+                player_status.setRepeat_status(AppConstant.Status.status_repeat_onlyone);
+                break;
+            case AppConstant.Status.status_repeat_onlyone:
+                player_status.setRepeat_status(AppConstant.Status.status_repeat_none);
+                break;
+            case AppConstant.Status.status_repeat_none:
+                player_status.setRepeat_status(AppConstant.Status.status_repeat);
+        }
+    }
+
+    /**
      * 实现一个OnPrepareLister接口,当音乐准备好的时候开始播放
      */
     private final class PreparedListener implements MediaPlayer.OnPreparedListener {
@@ -275,11 +328,26 @@ public class PlayerService extends Service {
     /**
      * 消息发送机制：更新操作
      */
-    private void msgSend_Update(){
+    private void msgSend_Update() {
         Message message = new Message();
         message.what = AppConstant.ActionTypes.UPDATE_ACTION;
+        Message message_ui = new Message();
+        message_ui.what = AppConstant.ActionTypes.UPDATE_ACTION;
         try {
             if (mainHandle != null) mainHandle.sendMessage(message);
+            if (uiHandle != null) uiHandle.sendMessage(message_ui);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 消息发送机制：播放完成
+     */
+    private void msgSend_Complete() {
+        Message message = new Message();
+        message.what = AppConstant.ActionTypes.COMPLETE_ACTION;
+        try {
             if (uiHandle != null) uiHandle.sendMessage(message);
         } catch (Exception e) {
             e.printStackTrace();

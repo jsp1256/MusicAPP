@@ -202,6 +202,19 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
                 break;
             case R.id.next_music:
                 playBinder.callnext();
+                break;
+            case R.id.play_music:
+                playBinder.callplay_pause();
+                setPlayBtn(playBinder.callgetPlayer_status());
+                break;
+            case R.id.random_music:
+                playBinder.callsetRandom();
+                setRandomBtn(playBinder.callgetPlayer_status());
+                break;
+            case R.id.repeat_music:
+                playBinder.callsetRepeat();
+                setRepeatBtn(playBinder.callgetPlayer_status());
+                break;
         }
     }
 
@@ -217,6 +230,7 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
                 int musicMax=(int)playBinder.callgetlocalmusic().getDuration();
                 int audioTrackMax=audioTrack.getMax();
                 playBinder.callPlayPosition(musicMax*dest/audioTrackMax);
+                current_progress.setText(MediaUtils.formatTime(playBinder.callgetCurrentProgress()));
             }
         }
 
@@ -239,14 +253,18 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
             if (msg.what == AppConstant.ActionTypes.UPDATE_ACTION) {
                 Mp3Info mp3Info = playBinder.callgetlocalmusic();
                 setStaticValue(mp3Info);
-            }
-            if (msg.what == AppConstant.ActionTypes.MUSIC_CURRENT) {
+                setPlayBtn(playBinder.callgetPlayer_status());
+            } else if (msg.what == AppConstant.ActionTypes.MUSIC_CURRENT) {
                 float position = playBinder.callgetCurrentProgress();
                 current_progress.setText(MediaUtils.formatTime(playBinder.callgetCurrentProgress()));
                 Mp3Info mp3Info = playBinder.callgetlocalmusic();
                 float musicMax = mp3Info.getDuration();
                 float audiotrackMax = audioTrack.getMax();
                 audioTrack.setProgress((int) (audiotrackMax * position / musicMax));
+            }else if(msg.what==AppConstant.ActionTypes.COMPLETE_ACTION){
+                audioTrack.setProgress(0);
+                setPlayBtn(playBinder.callgetPlayer_status());
+                current_progress.setText("0:00");
             }
         }
     }
