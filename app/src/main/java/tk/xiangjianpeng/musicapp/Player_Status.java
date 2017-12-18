@@ -1,7 +1,8 @@
 package tk.xiangjianpeng.musicapp;
 
 /**
- * Created by user on 2017/12/14.
+ * @author xiangjianpeng
+ * 播放器状态实体类
  */
 
 public class Player_Status {

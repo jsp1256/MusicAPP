@@ -184,6 +184,7 @@ public class MainActivity extends CheckPermissionsActivity {
     protected void onResume() {
         super.onResume();
         try {
+            if(playBinder!=null) playBinder.callupdate();
             mp3Infos = MediaUtils.getMp3Infos(getApplicationContext());   //获取歌曲对象集合
             setListAdpter(MediaUtils.getMusicMaps(mp3Infos));             //显示歌曲列表
         } catch (Exception e) {

@@ -10,7 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by user on 2017/12/12.
+ * @author xiangjianpeng
+ * 媒体工具实体类
  */
 
 public class MediaUtils {

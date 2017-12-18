@@ -14,7 +14,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 /**
- * Created by user on 2017/12/13.
+ * @author xiangjianpeng
+ * UI界面实体类
  */
 
 public class UiActivity extends AppCompatActivity implements View.OnClickListener {

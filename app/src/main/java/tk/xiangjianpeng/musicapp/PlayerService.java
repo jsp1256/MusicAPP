@@ -11,6 +11,10 @@ import android.widget.Toast;
 
 import java.util.List;
 
+/**
+ * @author xiangjianpeng
+ * 音乐播放服务类
+ */
 public class PlayerService extends Service {
     private MediaPlayer mediaPlayer = new MediaPlayer();
     private Player_Status player_status;

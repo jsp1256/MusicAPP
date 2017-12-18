@@ -18,7 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by user on 2017/12/13.
+ * @author xiangjianpeng
+ * 权限认证实体类（带界面）
+ * 魔改自高德地图示例权限类
  */
 
 public class CheckPermissionsActivity extends AppCompatActivity {

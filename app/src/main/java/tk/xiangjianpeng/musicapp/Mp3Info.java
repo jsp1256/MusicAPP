@@ -1,7 +1,8 @@
 package tk.xiangjianpeng.musicapp;
 
 /**
- * Created by user on 2017/12/12.
+ * @author xiangjianpeng
+ * 音乐属性实体类
  */
 
 public class Mp3Info {
