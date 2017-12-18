@@ -7,13 +7,15 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author xiangjianpeng
- * 音乐播放服务类
+ *         音乐播放服务类
  */
 public class PlayerService extends Service {
     private MediaPlayer mediaPlayer = new MediaPlayer();
@@ -23,6 +25,13 @@ public class PlayerService extends Service {
     private MainActivity.MainHandle mainHandle;     //主界面消息通信
     private UiActivity.UiHandle uiHandle;           //UI界面消息通信
     DelayThread delayThread = new DelayThread(200);
+
+    private int currentTime;    //当前时间
+    private int duration;       //持续时间
+
+    private LrcProcess mLrcProcess; //歌词处理
+    private List<LrcContent> lrcList = new ArrayList<LrcContent>(); //存放歌词列表对象
+    private int index = 0;          //歌词检索值
 
     public PlayerService() {
     }
@@ -107,6 +116,11 @@ public class PlayerService extends Service {
         //设置播放器状态：循环
         protected void callsetRepeat() {
             setRepeat();
+        }
+
+        //初始化歌词显示
+        protected void callinitLrc(LrcTextView lrcTextView) {
+            initLrc(lrcTextView);
         }
     }
 
@@ -232,7 +246,7 @@ public class PlayerService extends Service {
             player_status.setPause(false);
             player_status.setPlay(true);
             mediaPlayer.start();
-        }else if (mediaPlayer != null && !mediaPlayer.isPlaying()){
+        } else if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
             player_status.setPlay(true);
             play(position);
         }
@@ -260,6 +274,74 @@ public class PlayerService extends Service {
         position = (int) (Math.random() * mp3Infos.size());
         play(position);
         msgSend_Update();
+    }
+
+    /**
+     * 初始化歌词配置
+     */
+    public void initLrc(LrcTextView lrcTextView) {
+        mLrcProcess = new LrcProcess();
+        //读取歌词文件
+        mLrcProcess.readLRC(mp3Infos.get(position).getUrl());
+        //传回处理后的歌词文件
+        lrcList = mLrcProcess.getLrcList();
+        if (lrcList.size() > 0) {
+            lrcTextView.setmLrcList(lrcList);
+            //切换带动画显示歌词
+            lrcTextView.setAnimation(AnimationUtils.loadAnimation(PlayerService.this, R.anim.alpha_z));
+            LrcRunnable lrcRunnable=new LrcRunnable();
+            lrcRunnable.setLrcTextView(lrcTextView);
+            uiHandle.post(lrcRunnable);
+        }
+    }
+
+    /**
+     * 自定义线程，负责歌词显示的刷新
+     */
+    private class LrcRunnable implements Runnable{
+        private LrcTextView lrcTextView;
+
+        public void setLrcTextView(LrcTextView lrcTextView) {
+            this.lrcTextView = lrcTextView;
+        }
+
+        @Override
+        public void run() {
+            lrcTextView.setIndex(lrcIndex());
+            lrcTextView.invalidate();
+            uiHandle.postDelayed(this, 100);
+        }
+    }
+
+
+    /**
+     * 根据时间获取歌词显示的索引值
+     *
+     * @return
+     */
+    public int lrcIndex() {
+        if (mediaPlayer.isPlaying()) {
+            currentTime = mediaPlayer.getCurrentPosition();
+            duration = mediaPlayer.getDuration();
+        }
+        if (currentTime < duration) {
+            for (int i = 0; i < lrcList.size(); i++) {
+                if (i < lrcList.size() - 1) {
+                    if (currentTime < lrcList.get(i).getLrcTime() && i == 0) {
+                        index = i;
+                    }
+                    if (currentTime > lrcList.get(i).getLrcTime()
+                            && currentTime < lrcList.get(i + 1).getLrcTime()) {
+                        index = i;
+                    }
+                }
+                if (i == lrcList.size() - 1
+                        && currentTime > lrcList.get(i).getLrcTime()) {
+                    index = i;
+                }
+            }
+        }
+        return index;
     }
 
     /**

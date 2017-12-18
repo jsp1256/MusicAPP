@@ -15,16 +15,10 @@ import android.widget.TextView;
 
 /**
  * @author xiangjianpeng
- * UI界面实体类
+ *         UI界面实体类
  */
 
 public class UiActivity extends AppCompatActivity implements View.OnClickListener {
-    private int repeatState;                        //循环标识
-    private boolean isFirstTime = true;             // 是否是第一次
-    private boolean isPlaying;                      // 正在播放
-    private boolean isPause;                        // 暂停
-    private boolean isNoneShuffle = true;           // 顺序播放
-    private boolean isShuffle = false;              // 随机播放
     private Player_Status player_status;            //播放器状态
 
     private Button mainBtn;             //返回主Activity
@@ -38,6 +32,7 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
     private SeekBar audioTrack;         //播放器进度条
     private TextView current_progress;  //当前时间
     private TextView final_progress;    //结束时间
+    public LrcTextView lrcTextView;    //歌词秀
 
     private int currentTime;    //当前时间
     private int duration;       //持续时间
@@ -66,6 +61,7 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
         audioTrack = (SeekBar) findViewById(R.id.audioTrack);
         current_progress = (TextView) findViewById(R.id.current_progress);
         final_progress = (TextView) findViewById(R.id.final_progress);
+        lrcTextView = (LrcTextView) findViewById(R.id.lrcTextView);
 
         mainBtn.setOnClickListener(this);
         previousBtn.setOnClickListener(this);
@@ -90,6 +86,8 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
         setPlayBtn(player_status);
         setRandomBtn(player_status);
         setRepeatBtn(player_status);
+        //显示歌词
+        playBinder.callinitLrc(lrcTextView);
     }
 
     /**
@@ -222,15 +220,15 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
     /**
      * 进度条点击事件监听器
      */
-    private class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener{
+    private class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            if(fromUser){
-                int dest=seekBar.getProgress();
-                int musicMax=(int)playBinder.callgetlocalmusic().getDuration();
-                int audioTrackMax=audioTrack.getMax();
-                playBinder.callPlayPosition(musicMax*dest/audioTrackMax);
+            if (fromUser) {
+                int dest = seekBar.getProgress();
+                int musicMax = (int) playBinder.callgetlocalmusic().getDuration();
+                int audioTrackMax = audioTrack.getMax();
+                playBinder.callPlayPosition(musicMax * dest / audioTrackMax);
                 current_progress.setText(MediaUtils.formatTime(playBinder.callgetCurrentProgress()));
             }
         }
@@ -262,7 +260,7 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
                 float musicMax = mp3Info.getDuration();
                 float audiotrackMax = audioTrack.getMax();
                 audioTrack.setProgress((int) (audiotrackMax * position / musicMax));
-            }else if(msg.what==AppConstant.ActionTypes.COMPLETE_ACTION){
+            } else if (msg.what == AppConstant.ActionTypes.COMPLETE_ACTION) {
                 audioTrack.setProgress(0);
                 setPlayBtn(playBinder.callgetPlayer_status());
                 current_progress.setText("0:00");
