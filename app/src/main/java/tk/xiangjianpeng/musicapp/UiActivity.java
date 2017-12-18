@@ -48,6 +48,9 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
         ServiceBind();
     }
 
+    /**
+     * 各种按钮控件的初始化
+     */
     private void init() {
         uiHandle = new UiHandle();
         mainBtn = (Button) findViewById(R.id.btn_to_main);

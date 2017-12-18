@@ -7,7 +7,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
-import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -288,7 +287,7 @@ public class PlayerService extends Service {
         if (lrcList.size() > 0) {
             lrcTextView.setmLrcList(lrcList);
             //切换带动画显示歌词
-            lrcTextView.setAnimation(AnimationUtils.loadAnimation(PlayerService.this, R.anim.alpha_z));
+            //lrcTextView.setAnimation(AnimationUtils.loadAnimation(PlayerService.this, R.anim.alpha_z));
             LrcRunnable lrcRunnable=new LrcRunnable();
             lrcRunnable.setLrcTextView(lrcTextView);
             uiHandle.post(lrcRunnable);
@@ -309,7 +308,8 @@ public class PlayerService extends Service {
         public void run() {
             lrcTextView.setIndex(lrcIndex());
             lrcTextView.invalidate();
-            uiHandle.postDelayed(this, 100);
+            lrcTextView.changeCurrent(getCurrentProgress());
+            uiHandle.postDelayed(this, 1000);
         }
     }
 
