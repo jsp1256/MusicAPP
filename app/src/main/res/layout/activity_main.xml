@@ -19,53 +19,9 @@
     </ListView>
 
     <include layout="@layout/menutab_layout"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:layout_below="@+id/music_list"/>
-    <RelativeLayout
-        android:id="@+id/singleSong_layout"
-        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
         android:layout_height="50dp"
-        android:layout_alignParentBottom="true" >
-
-        <ImageView
-            android:id="@+id/music_album"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:src="@drawable/music" />
-
-
-        <RelativeLayout
-            android:id="@+id/music_about_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentBottom="true"
-            android:layout_alignTop="@+id/music_album"
-            android:layout_toRightOf="@id/music_album" >
-
-            <TextView
-                android:id="@+id/music_Title_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_marginTop="5.0dp"
-                android:layout_marginLeft="5.0dp"
-                android:text="@string/music_name"
-                android:textColor="@android:color/white"/>
-            <TextView
-                android:id="@+id/music_Artist_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/music_Title_tv"
-                android:layout_alignParentLeft="true"
-                android:layout_marginLeft="5.0dp"
-                android:layout_marginTop="8.0dp"
-                android:text="@string/artist"
-                android:textColor="@android:color/white"/>"
-        </RelativeLayout>
-
-    </RelativeLayout>
+        android:layout_width="match_parent"
+        />
 
 </RelativeLayout>
