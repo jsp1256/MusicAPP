@@ -34,9 +34,6 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
     private TextView final_progress;    //结束时间
     public LrcTextView lrcTextView;    //歌词秀
 
-    private int currentTime;    //当前时间
-    private int duration;       //持续时间
-
     private PlayServiceConnection playServiceConnection;
     private PlayerService.PlayBinder playBinder;
     private UiHandle uiHandle;
@@ -201,9 +198,11 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
                 break;
             case R.id.previous_music:
                 playBinder.callprevious();
+                playBinder.callLrcViewRestart(lrcTextView);
                 break;
             case R.id.next_music:
                 playBinder.callnext();
+                playBinder.callLrcViewRestart(lrcTextView);
                 break;
             case R.id.play_music:
                 playBinder.callplay_pause();
@@ -232,6 +231,7 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
                 int musicMax = (int) playBinder.callgetlocalmusic().getDuration();
                 int audioTrackMax = audioTrack.getMax();
                 playBinder.callPlayPosition(musicMax * dest / audioTrackMax);
+                lrcTextView.setIndex(playBinder.calllrcIndex());
                 current_progress.setText(MediaUtils.formatTime(playBinder.callgetCurrentProgress()));
             }
         }

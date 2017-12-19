@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author xiangjianpeng
@@ -27,7 +29,9 @@ public class LrcProcess {
     public String readLRC(String path) {
         //定义一个StringBuilder对象，用来存放歌词内容
         StringBuilder stringBuilder = new StringBuilder();
-        File f = new File(path.replace(".mp3", ".lrc"));
+        //BUG修复：按文件名匹配，修正按照特定格式匹配可能造成的错误。
+        String prefix=path.substring(path.lastIndexOf(".")+1);
+        File f = new File(path.replace("."+prefix, ".lrc"));
 
         try {
             //创建一个文件输入流对象
@@ -36,9 +40,17 @@ public class LrcProcess {
             BufferedReader br = new BufferedReader(isr);
             String s = "";
             while((s = br.readLine()) != null) {
+                //正则表达式匹配
+                Matcher matcher = Pattern.compile("\\[\\d.+\\]+").matcher(s);
+                Matcher matcher1=Pattern.compile("\\[\\d.+\\].+").matcher(s);
+                // 如果形如：[xxx]后面啥也没有的，则return空
+                if (!matcher.matches()&&!matcher1.matches()) {
+                   // System.out.println("throws " + s);
+                    continue;
+                }
                 //替换字符
                 s = s.replace("[", "");
-                s = s.replace("]", "@");
+                s = s.replace("]", "@ ");
 
                 //分离“@”字符
                 String splitLrcData[] = s.split("@");

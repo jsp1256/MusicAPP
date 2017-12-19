@@ -7,6 +7,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class PlayerService extends Service {
     private MainActivity.MainHandle mainHandle;     //主界面消息通信
     private UiActivity.UiHandle uiHandle;           //UI界面消息通信
     DelayThread delayThread = new DelayThread(200);
+    LrcRunnable lrcRunnable = new LrcRunnable();
 
     private int currentTime;    //当前时间
     private int duration;       //持续时间
@@ -51,7 +53,7 @@ public class PlayerService extends Service {
 
         //获取当前播放位置
         protected int callgetposition() {
-            return position;
+            return getPosition();
         }
 
         //获取当前音乐播放进度
@@ -120,6 +122,20 @@ public class PlayerService extends Service {
         //初始化歌词显示
         protected void callinitLrc(LrcTextView lrcTextView) {
             initLrc(lrcTextView);
+        }
+
+        //根据时间获取歌词显示的索引值
+        protected int calllrcIndex() {
+            return lrcIndex();
+        }
+
+        //停止歌词更新
+        protected void callLrcViewstop(LrcTextView lrcTextView) {
+            LrcViewstop(lrcTextView);
+        }
+        //重启歌词视图（用于切换下一曲）
+        protected void callLrcViewRestart(LrcTextView lrcTextView){
+            LrcViewRestart(lrcTextView);
         }
     }
 
@@ -194,6 +210,7 @@ public class PlayerService extends Service {
      */
     private void seekTo(int position) {
         mediaPlayer.seekTo(position);
+        //todo
     }
 
     /**
@@ -285,11 +302,11 @@ public class PlayerService extends Service {
         //传回处理后的歌词文件
         lrcList = mLrcProcess.getLrcList();
         if (lrcList.size() > 0) {
-            lrcTextView.setmLrcList(lrcList);
             //切换带动画显示歌词
-            //lrcTextView.setAnimation(AnimationUtils.loadAnimation(PlayerService.this, R.anim.alpha_z));
-            LrcRunnable lrcRunnable=new LrcRunnable();
+            lrcTextView.setAnimation(AnimationUtils.loadAnimation(PlayerService.this, R.anim.alpha_z));
+            lrcTextView.setmLrcList(lrcList);
             lrcRunnable.setLrcTextView(lrcTextView);
+            lrcRunnable.setRunning(true);
             uiHandle.post(lrcRunnable);
         }
     }
@@ -297,22 +314,42 @@ public class PlayerService extends Service {
     /**
      * 自定义线程，负责歌词显示的刷新
      */
-    private class LrcRunnable implements Runnable{
+    private class LrcRunnable implements Runnable {
         private LrcTextView lrcTextView;
+        private boolean isRunning = false;
 
         public void setLrcTextView(LrcTextView lrcTextView) {
             this.lrcTextView = lrcTextView;
         }
 
+        public void setRunning(boolean running) {
+            isRunning = running;
+        }
+
         @Override
         public void run() {
             lrcTextView.setIndex(lrcIndex());
-            lrcTextView.invalidate();
-            lrcTextView.changeCurrent(getCurrentProgress());
-            uiHandle.postDelayed(this, 1000);
+            uiHandle.postDelayed(this, 500);
         }
     }
 
+    /**
+     * 重置歌词显示
+     * @param lrcTextView
+     */
+    public void LrcViewRestart(LrcTextView lrcTextView){
+        LrcViewstop(lrcTextView);
+        initLrc(lrcTextView);
+    }
+
+    /**
+     * 停止歌词更新
+     * @param lrcTextView
+     */
+    public void LrcViewstop(LrcTextView lrcTextView){
+        uiHandle.removeCallbacks(lrcRunnable);
+        lrcTextView.setmLrcList(null);
+    }
 
     /**
      * 根据时间获取歌词显示的索引值
@@ -351,6 +388,15 @@ public class PlayerService extends Service {
         if (mediaPlayer != null)
             return mediaPlayer.getCurrentPosition();
         return 0;
+    }
+
+    /**
+     * 获得当前播放曲目序号
+     *
+     * @return
+     */
+    public int getPosition() {
+        return position;
     }
 
     /**

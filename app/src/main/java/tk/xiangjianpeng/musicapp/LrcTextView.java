@@ -18,24 +18,19 @@ import java.util.List;
  */
 
 public class LrcTextView extends android.support.v7.widget.AppCompatTextView {
-    private static final int SCROLL_TIME = 500;
-    private long mNextTime = 0l; // 保存下一句开始的时间
+    private long mNextTime = 0; // 保存下一句开始的时间
+    private int nextindex = 0;
 
-    private int mViewWidth; // view的宽度
-    private int mLrcHeight; // lrc界面的高度
-    private int mRows;      // 多少行
-    private int mCurrentLine = 0; // 当前行
     private int mOffsetY;   // y上的偏移
     private int mMaxScroll; // 最大滑动距离=一行歌词高度+歌词间距
     public Scroller mScroller;
-
 
 
     private float width;        //歌词视图宽度
     private float height;       //歌词视图高度
     private Paint currentPaint; //当前画笔对象
     private Paint notCurrentPaint;  //非当前画笔对象
-    private float textHeight = 25;  //文本高度
+    private float textHeight = 30;  //文本高度
     private float textSize = 18;        //文本大小
     private int index = 0;      //list集合下标
 
@@ -47,28 +42,20 @@ public class LrcTextView extends android.support.v7.widget.AppCompatTextView {
 
     public LrcTextView(Context context) {
         super(context);
-        init();
-        //滑动弹窗代码
-        mScroller = new Scroller(context, new LinearInterpolator());
+        init(context);
     }
 
     public LrcTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        init();
-        //TODO
-        //滑动弹窗代码
-        mScroller = new Scroller(context, new LinearInterpolator());
-        inflateAttributes(attrs);
+        init(context);
     }
 
     public LrcTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
-        mScroller = new Scroller(context, new LinearInterpolator());
-        inflateAttributes(attrs);
+        init(context);
     }
 
-    private void init() {
+    private void init(Context context) {
         setFocusable(true);     //设置可对焦
 
         //高亮部分
@@ -80,6 +67,10 @@ public class LrcTextView extends android.support.v7.widget.AppCompatTextView {
         notCurrentPaint = new Paint();
         notCurrentPaint.setAntiAlias(true);
         notCurrentPaint.setTextAlign(Paint.Align.CENTER);
+        //滑动器初始化
+        mScroller = new Scroller(context, new LinearInterpolator());
+        //获取最大滚动的距离
+        mMaxScroll = (int) textHeight;
     }
 
 
@@ -92,7 +83,6 @@ public class LrcTextView extends android.support.v7.widget.AppCompatTextView {
         if (canvas == null) {
             return;
         }
-
         currentPaint.setColor(Color.argb(210, 251, 248, 29));
         notCurrentPaint.setColor(Color.argb(140, 255, 255, 255));
 
@@ -104,16 +94,16 @@ public class LrcTextView extends android.support.v7.widget.AppCompatTextView {
 
         try {
             setText("");
-            canvas.drawText(mLrcList.get(index).getLrcStr(), width / 2, height / 2, currentPaint);
+            canvas.drawText(mLrcList.get(index).getLrcStr(), width / 2, (height - mOffsetY) / 2, currentPaint);
 
-            float tempY = height / 2;
+            float tempY = (height - mOffsetY) / 2;
             //画出本句之前的句子
             for (int i = index - 1; i >= 0; i--) {
                 //向上推移
                 tempY = tempY - textHeight;
                 canvas.drawText(mLrcList.get(i).getLrcStr(), width / 2, tempY, notCurrentPaint);
             }
-            tempY = height / 2;
+            tempY = (height - mOffsetY) / 2;
             //画出本句之后的句子
             for (int i = index + 1; i < mLrcList.size(); i++) {
                 //往下推移
@@ -126,72 +116,46 @@ public class LrcTextView extends android.support.v7.widget.AppCompatTextView {
     }
 
     /**
-    * 当view大小改变的时候调用的方法
+     * 当view大小改变的时候调用的方法
      */
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         this.width = w;
         this.height = h;
-        //所属：滑动代码
-        mViewWidth = getMeasuredWidth();
     }
 
 
     public void setIndex(int index) {
+        if(Math.abs(index-this.index)==1)
+            changeCurrent();
         this.index = index;
+        //mOffsetY=0;
     }
 
     /**
      * 滑动界面代码开始
      */
-
-    private void inflateAttributes(AttributeSet attrs) {
-
-        //获取最大滚动的距离
-        mMaxScroll = (int) textHeight;
-    }
-
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-
     // 外部提供方法
     // 传入当前播放时间
-    public synchronized void changeCurrent(long time) {
-        // 如果当前时间小于下一句开始的时间
-        // 直接return
-        if (mNextTime > time) {
+    public synchronized void changeCurrent() {
+        if (nextindex > index && nextindex < mLrcList.size()) {
             return;
         }
-
-        // 每次进来都遍历存放的时间
-        for (int i = 0; i < mLrcList.size(); i++) {
-            // 发现这个时间大于传进来的时间
-            // 那么现在就应该显示这个时间前面的对应的那一行
-            // 每次都重新显示，是不是要判断：现在正在显示就不刷新了
-            if (mLrcList.get(i).getLrcTime() > time) {
-                mNextTime = mLrcList.get(i).getLrcTime();
-                mScroller.abortAnimation();
-                mScroller.startScroll(0, 0, 0, mMaxScroll, (int)(mNextTime-time));
-//              mNextTime = mTimes.get(i);
-//              mCurrentLine = i <= 1 ? 0 : i - 1;
-                postInvalidate();
-                return;
-            }
-        }
+        nextindex=index+1;
+        mScroller.abortAnimation();
+        mScroller.startScroll(0, 0, 0, mMaxScroll, (int) (mLrcList.get(nextindex).getLrcTime() - mLrcList.get(nextindex-1).getLrcTime()));
+        invalidate();
+        return;
     }
 
     @Override
     public void computeScroll() {
-        if(mScroller.computeScrollOffset()) {
+        if (mScroller.computeScrollOffset()) {
             mOffsetY = mScroller.getCurrY();
-            if(mScroller.isFinished()) {
-                mOffsetY = 0;
-            }
             postInvalidate();
         }
+        super.computeScroll();
     }
 }
 
