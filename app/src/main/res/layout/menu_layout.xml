@@ -10,15 +10,69 @@
     android:background="@drawable/bg"
     tools:context="tk.xiangjianpeng.musicapp.MainActivity">
 
-    <ListView
-        android:id="@+id/music_list"
+    <LinearLayout
+        android:id="@+id/menu_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="3dp"
+        android:background="#5cacee"
+        android:gravity="center" >
+
+        <TextView
+            android:id="@+id/fragment1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/title_section1"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/fragment2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/title_section2"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/menu_fragmentTitle"
+        android:layout_below="@+id/menu_btn"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:gravity="center" >
+
+        <!-- 该textview作为红线移动到当前fragment下 -->
+
+        <TextView
+            android:id="@+id/fragmentTitle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#5cacee" />
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <android.support.v4.view.ViewPager
+        android:layout_below="@+id/menu_fragmentTitle"
+        android:layout_above="@+id/menutab_layout"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/btnlayout"
-        android:layout_above="@+id/singleSong_layout">
-    </ListView>
+        android:alpha="0.8">
+    </android.support.v4.view.ViewPager>
 
     <include layout="@layout/menutab_layout"
+        android:id="@+id/menutab_layout"
         android:layout_alignParentBottom="true"
         android:layout_height="50dp"
         android:layout_width="match_parent" />

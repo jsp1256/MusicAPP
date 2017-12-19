@@ -78,6 +78,22 @@ public class MediaUtils {
     }
 
     /**
+     * 生成首页本地歌曲的列表
+     * 目前仅作静态设置
+     * TODO 实现数据库后通过数据库查询
+     * @return
+     */
+
+    public static List<HashMap<String,String>> getMenuListMaps(){
+        List<HashMap<String,String>> menulist =new ArrayList<HashMap<String, String>>();
+        HashMap<String,String> map=new HashMap<>();
+        map.put("title","所有列表");
+        menulist.add(map);
+        map.clear();
+        return menulist;
+    }
+
+    /**
      * 格式化时间，将毫秒转换为分:秒格式
      *
      * @param time

@@ -23,6 +23,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".UiActivity"></activity>
+        <activity android:name=".MenuActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MenuActivity" />
+            </intent-filter>
+        </activity>
         <service
             android:name=".PlayerService"
             android:enabled="true"
