@@ -1,5 +1,6 @@
 package tk.xiangjianpeng.musicapp.Fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -7,6 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import tk.xiangjianpeng.musicapp.MediaUtils;
 import tk.xiangjianpeng.musicapp.R;
@@ -34,8 +39,7 @@ public class MusicListFragment extends Fragment {
      */
     public void setListAdpter() {
         adapter = new SimpleAdapter(this.getContext(), MediaUtils.getMenuListMaps(),
-                R.layout.menu_list_layout, new String[]{"title"
-                }, new int[]{R.id.menu_title});
+                R.layout.menu_list_layout, new String[]{"title"}, new int[]{R.id.menu_title});
         listView.setAdapter(adapter);
     }
 }

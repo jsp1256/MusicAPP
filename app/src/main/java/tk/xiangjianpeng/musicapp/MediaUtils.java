@@ -87,9 +87,11 @@ public class MediaUtils {
     public static List<HashMap<String,String>> getMenuListMaps(){
         List<HashMap<String,String>> menulist =new ArrayList<HashMap<String, String>>();
         HashMap<String,String> map=new HashMap<>();
+        HashMap<String,String> map2=new HashMap<>();
         map.put("title","所有列表");
         menulist.add(map);
-        map.clear();
+        map2.put("title","历史记录");
+        menulist.add(map2);
         return menulist;
     }
 
