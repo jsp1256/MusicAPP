@@ -9,7 +9,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -116,14 +115,6 @@ public class MenuActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         public void onPageScrollStateChanged(int state) {
-
-        }
-    }
-
-    private class MenuListItemClickListener implements AdapterView.OnItemClickListener{
-
-        @Override
-        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
         }
     }

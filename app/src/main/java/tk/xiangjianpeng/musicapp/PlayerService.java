@@ -295,6 +295,7 @@ public class PlayerService extends Service {
      * 初始化歌词配置
      */
     public void initLrc(LrcTextView lrcTextView) {
+        if(!player_status.isPlay()) return;
         mLrcProcess = new LrcProcess();
         //读取歌词文件
         mLrcProcess.readLRC(mp3Infos.get(position).getUrl());

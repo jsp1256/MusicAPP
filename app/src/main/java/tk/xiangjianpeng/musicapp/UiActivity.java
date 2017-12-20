@@ -205,11 +205,13 @@ public class UiActivity extends AppCompatActivity implements View.OnClickListene
                 playBinder.callLrcViewRestart(lrcTextView);
                 break;
             case R.id.play_music:
+                if(!player_status.isPlayed()) break;
                 playBinder.callplay_pause();
                 setPlayBtn(playBinder.callgetPlayer_status());
                 break;
             case R.id.random_music:
                 playBinder.callsetRandom();
+                if(playBinder.callgetPlayer_status().getRandom_status()==AppConstant.Status.status_random) playBinder.callupdate();
                 setRandomBtn(playBinder.callgetPlayer_status());
                 break;
             case R.id.repeat_music:
