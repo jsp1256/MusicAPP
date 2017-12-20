@@ -210,7 +210,6 @@ public class PlayerService extends Service {
      */
     private void seekTo(int position) {
         mediaPlayer.seekTo(position);
-        //todo
     }
 
     /**
@@ -306,7 +305,6 @@ public class PlayerService extends Service {
             lrcTextView.setAnimation(AnimationUtils.loadAnimation(PlayerService.this, R.anim.alpha_z));
             lrcTextView.setmLrcList(lrcList);
             lrcRunnable.setLrcTextView(lrcTextView);
-            lrcRunnable.setRunning(true);
             uiHandle.post(lrcRunnable);
         }
     }
@@ -316,14 +314,9 @@ public class PlayerService extends Service {
      */
     private class LrcRunnable implements Runnable {
         private LrcTextView lrcTextView;
-        private boolean isRunning = false;
 
         public void setLrcTextView(LrcTextView lrcTextView) {
             this.lrcTextView = lrcTextView;
-        }
-
-        public void setRunning(boolean running) {
-            isRunning = running;
         }
 
         @Override

@@ -3,4 +3,9 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="yellow_0">#ffffff</color>
+    <color name="yellow_1">#fcffd2</color>
+    <color name="yellow_2">#f7ff84</color>
+    <color name="yellow_3">#f3ff4c</color>
+    <color name="yellow">#eeff00</color><!--黄色 -->
 </resources>

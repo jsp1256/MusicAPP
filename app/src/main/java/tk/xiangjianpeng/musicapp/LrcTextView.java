@@ -2,7 +2,6 @@ package tk.xiangjianpeng.musicapp;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
@@ -30,9 +29,12 @@ public class LrcTextView extends android.support.v7.widget.AppCompatTextView {
     private float height;       //歌词视图高度
     private Paint currentPaint; //当前画笔对象
     private Paint notCurrentPaint;  //非当前画笔对象
-    private float textHeight = 30;  //文本高度
+    private float textHeight = 40;  //文本高度
     private float textSize = 18;        //文本大小
     private int index = 0;      //list集合下标
+
+    int currentcolor=getResources().getColor(R.color.yellow);//当前行颜色
+    int notcurrentcolor=getResources().getColor(R.color.yellow_0);//非当前行颜色
 
     private List<LrcContent> mLrcList = new ArrayList<LrcContent>();
 
@@ -83,13 +85,26 @@ public class LrcTextView extends android.support.v7.widget.AppCompatTextView {
         if (canvas == null) {
             return;
         }
-        currentPaint.setColor(Color.argb(210, 251, 248, 29));
-        notCurrentPaint.setColor(Color.argb(140, 255, 255, 255));
+        if(mOffsetY<2)
+            currentPaint.setColor(getResources().getColor(R.color.yellow_1));
+        else if(mOffsetY<4)
+            currentPaint.setColor(getResources().getColor(R.color.yellow_2));
+        else if(mOffsetY<6)
+            currentPaint.setColor(getResources().getColor(R.color.yellow_3));
+        else if(mOffsetY<24)
+            currentPaint.setColor(currentcolor);
+        else if(mOffsetY<26)
+            currentPaint.setColor(getResources().getColor(R.color.yellow_3));
+        else if(mOffsetY<28)
+            currentPaint.setColor(getResources().getColor(R.color.yellow_2));
+        else
+            currentPaint.setColor(getResources().getColor(R.color.yellow_1));
+        notCurrentPaint.setColor(notcurrentcolor);
 
-        currentPaint.setTextSize(30);
+        currentPaint.setTextSize(32);
         currentPaint.setTypeface(Typeface.SERIF);
 
-        notCurrentPaint.setTextSize(textSize);
+        notCurrentPaint.setTextSize(32);
         notCurrentPaint.setTypeface(Typeface.DEFAULT);
 
         try {
@@ -113,6 +128,7 @@ public class LrcTextView extends android.support.v7.widget.AppCompatTextView {
         } catch (Exception e) {
             setText("歌词秀");
         }
+        postInvalidateDelayed(200);
     }
 
     /**
