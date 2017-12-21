@@ -27,4 +27,12 @@ public class AppConstant {
         public static final int status_random_none=12;        //不随机播放
         public static final int status_random=13;             //随机播放
     }
+    public class HistoryDB{
+        public static final String ID="id";
+        public static final String TITLE="title";
+        public static final String ARTIST="artist";
+        public static final String DURATION="duration";
+        public static final String URL="url";
+        public static final String LAST_TIME="last_time";
+    }
 }

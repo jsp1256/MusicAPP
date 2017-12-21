@@ -11,15 +11,15 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import tk.xiangjianpeng.musicapp.MainActivity;
 import tk.xiangjianpeng.musicapp.MediaUtils;
 import tk.xiangjianpeng.musicapp.R;
-import tk.xiangjianpeng.musicapp.UiActivity;
 
 /**
  * Created by user on 2017/12/19.
  */
 
-public class MusicListFragment extends Fragment {
+public class MenuListFragment extends Fragment {
     Context MenuActivity;
     private ListView listView;
     private SimpleAdapter adapter;
@@ -49,7 +49,7 @@ public class MusicListFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             if(i==0){
-                Intent intent = new Intent(MenuActivity, UiActivity.class);
+                Intent intent = new Intent(MenuActivity, MainActivity.class);
                 startActivity(intent);
             }
         }

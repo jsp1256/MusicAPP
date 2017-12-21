@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Locale;
 
 import tk.xiangjianpeng.musicapp.Fragment.HistoryListFragment;
-import tk.xiangjianpeng.musicapp.Fragment.MusicListFragment;
+import tk.xiangjianpeng.musicapp.Fragment.MenuListFragment;
 
 /**
  * Created by user on 2017/12/18.
@@ -32,6 +32,8 @@ public class MenuActivity extends AppCompatActivity implements View.OnClickListe
     private int screenWidth, bottomLineWidth;
     private RelativeLayout menutab_Layout;
 
+    private MyHelper myHelper;//数据库管理
+
     public static final int FRAGMENT_COUNT = 2;
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -42,7 +44,7 @@ public class MenuActivity extends AppCompatActivity implements View.OnClickListe
         fragmentTitle2=(TextView)findViewById(R.id.fragment2);
         fragmentTitle2.setOnClickListener(this);
         titleBottomLine=(TextView)findViewById(R.id.fragmentTitle);
-        fragmentList.add(new MusicListFragment());
+        fragmentList.add(new MenuListFragment());
         fragmentList.add(new HistoryListFragment());
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.pager);
@@ -56,6 +58,11 @@ public class MenuActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
             }
         });
+
+        //数据库管理相关代码
+        myHelper=new MyHelper(this);
+        //myHelper.insert(1,"1","1",2,"1","1");
+        MediaUtils.getcurrenttime();
     }
 
     @Override

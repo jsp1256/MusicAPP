@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
 
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -119,6 +121,15 @@ public class MediaUtils {
             sec = "0000" + (time % (1000 * 60)) + "";
         }
         return min + ":" + sec.trim().substring(0, 2);
+    }
+
+    public static long getcurrenttime(){
+        SimpleDateFormat   formatter   =   new SimpleDateFormat("yyyyMMddHHmmss");
+        Date curDate =  new Date(System.currentTimeMillis());
+        String time=formatter.format(curDate);
+        long time2=Integer.parseInt(time);
+        StringBuffer stringBuffer=new StringBuffer(time2+"");
+        return time2;
     }
 
 }
