@@ -123,13 +123,11 @@ public class MediaUtils {
         return min + ":" + sec.trim().substring(0, 2);
     }
 
-    public static long getcurrenttime(){
-        SimpleDateFormat   formatter   =   new SimpleDateFormat("yyyyMMddHHmmss");
+    public static String getcurtime(){
+        SimpleDateFormat   formatter   =   new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date curDate =  new Date(System.currentTimeMillis());
         String time=formatter.format(curDate);
-        long time2=Integer.parseInt(time);
-        StringBuffer stringBuffer=new StringBuffer(time2+"");
-        return time2;
+        return time;
     }
 
 }
