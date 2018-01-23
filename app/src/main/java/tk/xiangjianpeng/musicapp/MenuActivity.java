@@ -62,7 +62,7 @@ public class MenuActivity extends AppCompatActivity implements View.OnClickListe
         //数据库管理相关代码
         myHelper=new MyHelper(this);
         //myHelper.insert(1,"1","1",2,"1","1");
-        MediaUtils.getcurrenttime();
+        MediaUtils.getcurtime();
     }
 
     @Override

@@ -38,7 +38,7 @@ public class MyHelper extends SQLiteOpenHelper {
      * @param url
      * @param last_time
      */
-    public void insert(long id, String title, String artist, long duration, String url, String last_time) {
+    public void insert(long id, String title, String artist, long duration, String url, long last_time) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(AppConstant.HistoryDB.ID, id);

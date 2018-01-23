@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.provider.MediaStore;
 
 import java.sql.Date;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -123,11 +122,12 @@ public class MediaUtils {
         return min + ":" + sec.trim().substring(0, 2);
     }
 
-    public static String getcurtime(){
-        SimpleDateFormat   formatter   =   new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    public static long getcurtime(){
+        //SimpleDateFormat   formatter   =   new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date curDate =  new Date(System.currentTimeMillis());
-        String time=formatter.format(curDate);
-        return time;
+        //String time=formatter.format(curDate);
+        long datetime=curDate.getTime();
+        return datetime;
     }
 
 }
